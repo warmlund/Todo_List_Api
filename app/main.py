@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from app.api.users import router as users_router
+from app.api.todos import router as todo_router
 
 from app.db import create_db_and_table
 
@@ -14,6 +15,7 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan = lifespan)
 
     app.include_router(users_router)
+    app.include_router(todo_router)
 
     return app
 
