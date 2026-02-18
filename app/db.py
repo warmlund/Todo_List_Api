@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, create_engine
 
 class User(SQLModel, table = True):
     id: int | None = Field(default = None, primary_key = True)
@@ -26,5 +25,3 @@ def create_db_and_table():
 def get_session():
     with Session(engine) as session:
         yield session
-
-SessionDep = Annotated[Session, Depends(get_session)]
