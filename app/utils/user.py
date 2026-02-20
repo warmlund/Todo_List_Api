@@ -2,7 +2,7 @@ import bcrypt
 
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
-from models.user import User, UserCreate
+from app.models.user import User, UserCreate
 from pydantic import EmailStr
 
 def hash_password(password: str) -> bytes:
@@ -15,12 +15,7 @@ def hash_password(password: str) -> bytes:
 
 def get_user_by_email (email: EmailStr, session: Session):
     statement = select(User).where(User.email == email)
-    user = session.exec(statement).first
-    
-    if user:
-        return user
-    
-    return None
+    return session.exec(statement).first()
 
 def create_user_in_db(user: UserCreate, session:Session):
     hashed_password = hash_password(user.password)

@@ -1,7 +1,6 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from models.user import User
-from app.db import SessionDep
+from app.models.user import User
 
 SECRET_KEY = "secret"
 ALGORITHM = "HS256"
