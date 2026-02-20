@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from app.api.users import router as users_router
-from app.api.todos import router as todo_router
+from app.routers.users import router as users_router
+from app.routers.todos import router as todo_router
 
 from app.db import create_db_and_table
 

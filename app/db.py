@@ -1,18 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlmodel import Field, Session, SQLModel, create_engine
-
-class User(SQLModel, table = True):
-    id: int | None = Field(default = None, primary_key = True)
-    name: str = Field(index = True)
-    email: str
-    password: str
-
-class Todo(SQLModel, table = True):
-    id: int | None = Field(default= None, primary_key= True)
-    title: str = Field(index = True)
-    description : str
+from sqlmodel import Session, SQLModel, create_engine
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
