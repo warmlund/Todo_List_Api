@@ -1,6 +1,5 @@
 from fastapi import APIRouter
-from app.schemas.todo import TodoCreate
-from app.models.todo import Todo
+from app.models.todo import Todo, TodoCreate
 from app.db import SessionDep
 
 router = APIRouter(prefix="/todos", tags=["todos"])
