@@ -7,7 +7,7 @@ class UserBase(SQLModel):
 class User(UserBase, table = True):
     id: int | None = Field(default = None, primary_key = True)
     name: str = Field(index=True)
-    password: bytes
+    password: str
 
 class UserPublic(UserBase):
     id: int

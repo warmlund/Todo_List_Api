@@ -5,17 +5,17 @@ from sqlmodel import Session, select
 from app.models.user import User, UserCreate, UserLogin
 from pydantic import EmailStr
 
-def hash_password(password: str) -> bytes:
+def hash_password(password: str) -> str:
     pw = password.encode("utf-8")
     salt = bcrypt.gensalt()
 
     hash = bcrypt.hashpw(pw, salt)
 
-    return hash
+    return hash.decode("utf-8")
 
-def verify_password(password: str, hashed_password: bytes) -> bool:
+def verify_password(password: str, hashed_password: str) -> bool:
     check_pw = bcrypt.checkpw(password.encode("utf-8"),
-                              hashed_password
+                              hashed_password.encode("utf-8")
                               )
     
     return check_pw
