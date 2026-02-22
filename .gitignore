@@ -420,3 +420,4 @@ FodyWeavers.xsd
 
 # Database
 *.db
+app/database.db

@@ -2,7 +2,7 @@ import bcrypt
 
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
-from app.models.user import User, UserCreate
+from app.models.user import User, UserCreate, UserLogin
 from pydantic import EmailStr
 
 def hash_password(password: str) -> bytes:
@@ -12,6 +12,13 @@ def hash_password(password: str) -> bytes:
     hash = bcrypt.hashpw(pw, salt)
 
     return hash
+
+def verify_password(password: str, hashed_password: bytes) -> bool:
+    check_pw = bcrypt.checkpw(password.encode("utf-8"),
+                              hashed_password
+                              )
+    
+    return check_pw
 
 def get_user_by_email (email: EmailStr, session: Session):
     statement = select(User).where(User.email == email)
@@ -34,6 +41,15 @@ def create_user_in_db(user: UserCreate, session:Session):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail = f"Error creating user: {e}"
         )
+
+def verify_login(user: UserLogin, session: Session):
+
+    existing_user = get_user_by_email(user.email, session)
+
+    if not existing_user:
+        return None
     
-    return new_user
-    
+    if verify_password(user.password, existing_user.password):
+        return existing_user
+        
+    return None
