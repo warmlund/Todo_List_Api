@@ -419,4 +419,4 @@ FodyWeavers.xsd
 *.msp
 
 # Database
-*.db
+app/database.db
