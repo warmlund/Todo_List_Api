@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.models.user import UserCreate, UserLogin
 from app.db import SessionDep
 from app.utils.user import *
@@ -23,8 +23,10 @@ def login(user: UserLogin, session: SessionDep):
 
     existing_user = verify_login(user, session)
 
-    if existing_user:
-        token = create_user_token(existing_user)
-        return token
-    else:
+    if not existing_user:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = "Invalid login credentials")
+        
+    token = create_user_token(existing_user)
+    return {"access_token": token, "token_type": "bearer"}
+
+#TODO: Add endpoint to get user from token

@@ -1,24 +1,15 @@
-import bcrypt
-
-from fastapi import HTTPException, status
-from sqlmodel import Session, select
-from app.models.user import User, UserCreate, UserLogin
 from pydantic import EmailStr
+from sqlmodel import Session, select
 
-def hash_password(password: str) -> str:
-    pw = password.encode("utf-8")
-    salt = bcrypt.gensalt()
+from fastapi import HTTPException, status, Depends
+from fastapi import security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-    hash = bcrypt.hashpw(pw, salt)
-
-    return hash.decode("utf-8")
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    check_pw = bcrypt.checkpw(password.encode("utf-8"),
-                              hashed_password.encode("utf-8")
-                              )
-    
-    return check_pw
+from app.db import get_session
+from app.models.user import User, UserCreate, UserLogin
+from app.utils.password import hash_password, verify_password
+from app.utils.token import decode_user_token
+from app.utils.security import oauth2_scheme
 
 def get_user_by_email (email: EmailStr, session: Session):
     statement = select(User).where(User.email == email)
@@ -53,3 +44,30 @@ def verify_login(user: UserLogin, session: Session):
         return existing_user
         
     return None
+
+def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depends(get_session)) -> User:
+    
+    credentials_exception = HTTPException(
+        status_code = status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or missing authentication token",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
+
+    try:
+        payload = decode_user_token(token)
+        user_id: str | None = payload.get("sub")
+
+        if user_id is None:
+            raise credentials_exception
+        
+    except:
+        raise credentials_exception
+    
+    statement = select(User).where(User.id == int(user_id))
+    user = session.exec(statement).first()
+
+    if user is None:
+        raise credentials_exception
+
+    return user
+
