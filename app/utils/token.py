@@ -6,7 +6,6 @@ from fastapi import HTTPException
 from app.models.user import User
 from dotenv import load_dotenv
 
-
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -25,7 +24,8 @@ def create_user_token(user: User):
 def decode_user_token(token: str):
     try:
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
-        user_id = decoded_token.get("sub")
+        user_id: int | None = decoded_token.get("sub")
+        
         if user_id is None:
             raise HTTPException(status_code = 401, detail = "Invalid token")
         return user_id

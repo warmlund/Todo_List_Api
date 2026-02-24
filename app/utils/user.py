@@ -34,33 +34,28 @@ def create_user_in_db(user: UserCreate, session:Session):
         )
 
 def verify_login(user: UserLogin, session: Session):
-
     existing_user = get_user_by_email(user.email, session)
-
+   
     if not existing_user:
         return None
     
-    if verify_password(user.password, existing_user.password):
-        return existing_user
+    if not verify_password(user.password, existing_user.password):
+        return None
         
-    return None
+    return existing_user
 
 def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depends(get_session)) -> User:
     
     credentials_exception = HTTPException(
         status_code = status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or missing authentication token",
-        headers={"WWW-Authenticate": "Bearer"}
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
     try:
-        payload = decode_user_token(token)
-        user_id: str | None = payload.get("sub")
+        user_id = decode_user_token(token)
 
-        if user_id is None:
-            raise credentials_exception
-        
-    except:
+    except HTTPException:
         raise credentials_exception
     
     statement = select(User).where(User.id == int(user_id))

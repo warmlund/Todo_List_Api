@@ -1,15 +1,13 @@
 from fastapi import APIRouter
 from app.models.todo import Todo, TodoCreate
 from app.db import SessionDep
+from app.utils.todo import create_todo_in_db
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
-@router.post("/todos")
-def create(todo: TodoCreate, session: SessionDep) -> Todo:
-    new_todo = Todo(**todo.model_dump())
-    session.add(new_todo)
-    session.commit()
-    session.refresh(new_todo)
+@router.post("/todos", response_model=Todo)
+def create(todo: TodoCreate, session: SessionDep):
+    new_todo = create_todo_in_db(todo, session)
     return new_todo
 
 #TODO edit endpoint for verifying user token and getting user from token

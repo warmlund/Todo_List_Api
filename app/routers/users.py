@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status
 from app.models.user import UserCreate, UserLogin
 from app.db import SessionDep
 from app.utils.user import *
@@ -28,5 +28,10 @@ def login(user: UserLogin, session: SessionDep):
         
     token = create_user_token(existing_user)
     return {"access_token": token, "token_type": "bearer"}
+
+@router.get("/getusers")
+def read_users(session: SessionDep, offset: int = 0, limit: int = 1000):
+    users = session.exec(select(User).offset(offset).limit(limit)).all()
+    return users
 
 #TODO: Add endpoint to get user from token
