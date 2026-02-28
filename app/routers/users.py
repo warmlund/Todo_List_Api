@@ -1,6 +1,10 @@
+from typing_extensions import Annotated
+
 from fastapi import APIRouter, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import UserCreate, UserLogin
 from app.db import SessionDep
+from app.utils import user
 from app.utils.user import *
 from app.utils.token import create_user_token
 
@@ -19,12 +23,19 @@ def register(user: UserCreate, session: SessionDep):
     return token
 
 @router.post("/login")
-def login(user: UserLogin, session: SessionDep):
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[SessionDep, Depends(get_session)]):
 
-    existing_user = verify_login(user, session)
+    existing_user = verify_login(UserLogin(email=form_data.username, password=form_data.password), session)
 
-    if existing_user:
-        token = create_user_token(existing_user)
-        return token
-    else:
+    if not existing_user:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = "Invalid login credentials")
+        
+    token = create_user_token(existing_user)
+    return {"access_token": token, "token_type": "bearer"}
+
+@router.get("/getusers")
+def read_users(session: SessionDep, offset: int = 0, limit: int = 1000):
+    users = session.exec(select(User).offset(offset).limit(limit)).all()
+    return users
+
+#TODO: Add endpoint to get user from token

@@ -1,24 +1,17 @@
-import bcrypt
+from typing import Annotated
 
-from fastapi import HTTPException, status
+from pydantic import EmailStr, ValidationError
 from sqlmodel import Session, select
+
+from fastapi import HTTPException, status, Depends
+from fastapi import security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from app.db import get_session
 from app.models.user import User, UserCreate, UserLogin
-from pydantic import EmailStr
-
-def hash_password(password: str) -> str:
-    pw = password.encode("utf-8")
-    salt = bcrypt.gensalt()
-
-    hash = bcrypt.hashpw(pw, salt)
-
-    return hash.decode("utf-8")
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    check_pw = bcrypt.checkpw(password.encode("utf-8"),
-                              hashed_password.encode("utf-8")
-                              )
-    
-    return check_pw
+from app.utils.password import hash_password, verify_password
+from app.utils.token import decode_user_token
+from app.utils.security import oauth2_scheme
 
 def get_user_by_email (email: EmailStr, session: Session):
     statement = select(User).where(User.email == email)
@@ -43,13 +36,39 @@ def create_user_in_db(user: UserCreate, session:Session):
         )
 
 def verify_login(user: UserLogin, session: Session):
-
     existing_user = get_user_by_email(user.email, session)
+    if existing_user and verify_password(user.password, existing_user.password):
+            return existing_user
 
-    if not existing_user:
-        return None
-    
-    if verify_password(user.password, existing_user.password):
-        return existing_user
-        
     return None
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: Annotated[Session, Depends(get_session)]) -> User:
+    
+    credentials_exception = HTTPException(
+        status_code = status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or missing authentication token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    user_exception = HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = "User not found",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        user_id = decode_user_token(token)
+
+        if user_id is None:
+            raise credentials_exception
+        
+        statement = select(User).where(User.id == user_id)
+        user = session.exec(statement).first()
+
+    except (ValidationError, Exception):
+        raise credentials_exception
+
+    if user is None:
+        raise user_exception
+
+    return user
+
