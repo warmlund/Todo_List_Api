@@ -1,4 +1,6 @@
-from pydantic import EmailStr
+from typing import Annotated
+
+from pydantic import EmailStr, ValidationError
 from sqlmodel import Session, select
 
 from fastapi import HTTPException, status, Depends
@@ -35,16 +37,12 @@ def create_user_in_db(user: UserCreate, session:Session):
 
 def verify_login(user: UserLogin, session: Session):
     existing_user = get_user_by_email(user.email, session)
-   
-    if not existing_user:
-        return None
-    
-    if not verify_password(user.password, existing_user.password):
-        return None
-        
-    return existing_user
+    if existing_user and verify_password(user.password, existing_user.password):
+            return existing_user
 
-def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depends(get_session)) -> User:
+    return None
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: Annotated[Session, Depends(get_session)]) -> User:
     
     credentials_exception = HTTPException(
         status_code = status.HTTP_401_UNAUTHORIZED,
@@ -52,17 +50,18 @@ def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depe
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    try:
-        user_id = decode_user_token(token)
+    user_exception = HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = "User not found",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
-    except HTTPException:
-        raise credentials_exception
-    
-    statement = select(User).where(User.id == int(user_id))
+    user_id = decode_user_token(token)
+    statement = select(User).where(User.id == user_id)
     user = session.exec(statement).first()
 
     if user is None:
-        raise credentials_exception
+        raise user_exception
 
     return user
 
