@@ -1,15 +1,17 @@
 from sqlmodel import Field, SQLModel
 
 class TodoBase(SQLModel):
-    title: str = Field(index=True)
-    description: str = Field(index=True)
+    user_id: int = Field(default=None, foreign_key="user.id")
+    
 
 class Todo(TodoBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(index=True)
+    description: str = Field(index=True)
 
-class TodoCreate(TodoBase):
+class TodoCreate(Todo):
     pass
 
-class TodoUpdate():
+class TodoUpdate(SQLModel):
     title: str | None = None
     description: str | None = None

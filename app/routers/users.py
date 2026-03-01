@@ -1,16 +1,14 @@
 from typing_extensions import Annotated
-
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import UserCreate, UserLogin
 from app.db import SessionDep
-from app.utils import user
 from app.utils.user import *
 from app.utils.token import create_user_token
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(tags=["users"])
 
-@router.post("/registration")
+@router.post("/register")
 def register(user: UserCreate, session: SessionDep):
     
     existing_user = get_user_by_email(user.email, session)
