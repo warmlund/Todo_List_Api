@@ -1,11 +1,8 @@
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-from fastapi import HTTPException, status, Depends, Query
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from sqlmodel import Session, select
+from fastapi import HTTPException, status
 from app.models.todo import Todo, TodoCreate, TodoUpdate
 
 def create_todo_in_db(todo: TodoCreate, session:Session, user_id: int):
-   
     new_todo =  Todo(title = todo.title, description = todo.description, user_id = user_id)
 
     try:
@@ -76,4 +73,21 @@ def delete_todo_in_db(todo_id: int, session: Session, user_id: int):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail = f"Error deleting todo: {e}"
+        )
+    
+def get_todos_in_db(session: Session, page: int, limit: int, user_id: int):
+    try:
+        offset = (page-1)*limit
+        statement = select(Todo).where(Todo.user_id == user_id).offset(offset).limit(limit)
+        todos = session.exec(statement).all()
+
+        return {"data": todos,
+                "page": page,
+                "limit": limit,
+                "total": len(todos)}
+
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail = "Todo items not found"
         )
