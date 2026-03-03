@@ -1,5 +1,7 @@
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from fastapi import HTTPException, status, Depends, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from app.models.todo import Todo, TodoCreate, TodoUpdate
 
 def create_todo_in_db(todo: TodoCreate, session:Session, user_id: int):
@@ -51,4 +53,27 @@ def update_todo_in_db(todo_id: int, todo_update: TodoUpdate, session: Session, u
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error updating todo: {e}"
+        )
+    
+def delete_todo_in_db(todo_id: int, session: Session, user_id: int):
+    
+    try:
+        statement = select(Todo).where(Todo.id == todo_id and Todo.user_id == user_id)
+        todo = session.exec(statement).one_or_none()
+
+        if not todo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail = "Todo item not found"
+            )
+        
+        session.delete(todo)
+        session.commit()
+        return todo
+
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail = f"Error deleting todo: {e}"
         )
