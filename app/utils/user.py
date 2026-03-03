@@ -1,11 +1,7 @@
 from typing import Annotated
-
 from pydantic import EmailStr, ValidationError
 from sqlmodel import Session, select
-
 from fastapi import HTTPException, status, Depends
-from fastapi import security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.db import get_session
 from app.models.user import User, UserCreate, UserLogin

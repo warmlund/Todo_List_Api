@@ -1,5 +1,4 @@
-from sqlmodel import select
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, Query
 from app.models.todo import Todo, TodoCreate, TodoUpdate
 from app.db import SessionDep
 from app.utils.todo import *
@@ -19,13 +18,10 @@ def update(todo_id: int, todo: TodoUpdate, session: SessionDep, current_user = D
 
 @router.delete("/todos/{todo_id}", status_code=204)
 def delete(todo_id:int, session: SessionDep, current_user = Depends(get_current_user)):
-    delted_todo = delete_todo_in_db(todo_id, session, current_user.id)
-    return delted_todo
+    deleted_todo = delete_todo_in_db(todo_id, session, current_user.id)
+    return deleted_todo
 
 @router.get("/gettodos")
-def read_todos(session: SessionDep, offset: int = 0, limit: int = 1000):
-    todos = session.exec(select(Todo).offset(offset).limit(limit)).all()
+def read_todos(session: SessionDep, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=100), current_user = Depends(get_current_user)):
+    todos = get_todos_in_db(session, page, limit, current_user.id)
     return todos
-
-#TODO: add endpoint for deleting todo item
-#TODO: add endpoint for getting all todo items for a user
