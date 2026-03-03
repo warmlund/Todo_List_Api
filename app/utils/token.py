@@ -25,7 +25,6 @@ def decode_user_token(token: str):
     if not token:
         raise HTTPException(status_code=401, detail="Missing token")
 
-    #try:
     bytes_token = token.encode('utf-8') 
     decoded_token = jwt.decode(bytes_token, SECRET_KEY, algorithms=[ALGORITHM])
     user_id = decoded_token.get("sub")
@@ -34,8 +33,3 @@ def decode_user_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return int(user_id)
-
-    """except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except (jwt.InvalidTokenError, ValueError, TypeError):
-        raise HTTPException(status_code=401, detail="Invalid token")"""
