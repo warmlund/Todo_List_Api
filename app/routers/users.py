@@ -35,5 +35,3 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: A
 def read_users(session: SessionDep, offset: int = 0, limit: int = 1000):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
-
-#TODO: Add endpoint to get user from token
