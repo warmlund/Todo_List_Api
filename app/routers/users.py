@@ -18,7 +18,7 @@ def register(user: UserCreate, session: SessionDep):
     
     new_user = create_user_in_db(user, session)
     token = create_user_token(new_user)
-    return token
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login")
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[SessionDep, Depends(get_session)]):
