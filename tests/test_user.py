@@ -1,5 +1,12 @@
-from app.models.user import UserCreate
-from app.utils.user import create_user_in_db
+"""
+Unit tests for user-related functionality
+
+Tests:
+- correct user registration is sucessful
+- user registration of existing user fails
+- correct user login is sucessful
+- incorrect user login fails
+"""
 
 def test_signup(client):
     """
