@@ -18,7 +18,7 @@ def register(user: UserCreate, session: SessionDep):
     
     new_user = create_user_in_db(user, session)
     token = create_user_token(new_user)
-    return token
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login")
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Annotated[SessionDep, Depends(get_session)]):
@@ -35,5 +35,3 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: A
 def read_users(session: SessionDep, offset: int = 0, limit: int = 1000):
     users = session.exec(select(User).offset(offset).limit(limit)).all()
     return users
-
-#TODO: Add endpoint to get user from token
