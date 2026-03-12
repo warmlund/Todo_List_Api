@@ -1,5 +1,5 @@
 # Todo List API
-> A simple API built with FastAPI. The API manages:
+> A simple API project based on https://roadmap.sh/projects/todo-list-api built with FastAPI. The API manages:
 > - User registration, authentication, and login
 > - Creating, updating, deleting, and retrieving todo items
 
