@@ -37,3 +37,13 @@
   - Password hashing with bcrypt
   - Token-based authentication
   - User-specific access to todos
+
+## Contact
+Emelie Wärmlund - @emeliewarmlund@gmail.com  
+<br>  
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/emelie-wärmlund-4b33bb98
