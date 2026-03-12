@@ -84,7 +84,6 @@ def test_no_access_other_users_todo(client, session, test_todo):
     User can't access another user's todos
     """
 
-    # Create another user
     other_user = create_user_in_db(
         UserCreate(
             email = "other@example.com",
